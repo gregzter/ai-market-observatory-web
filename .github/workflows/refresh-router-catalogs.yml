@@ -1,0 +1,41 @@
+name: Refresh public router catalogs
+
+on:
+  schedule:
+    - cron: '20 7 * * *'
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/refresh_router_catalogs.py'
+      - '.github/workflows/refresh-router-catalogs.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: refresh-router-catalogs
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Fetch exhaustive OpenRouter and Kilo catalogs
+        run: python3 scripts/refresh_router_catalogs.py
+
+      - name: Commit current router projection
+        run: |
+          if git diff --quiet -- data/router-catalogs.json && [ -f data/router-catalogs.json ]; then
+            echo "Router projection unchanged"
+            exit 0
+          fi
+          git config user.name "AI Market Observatory Bot"
+          git config user.email "amo-bot@users.noreply.github.com"
+          git add data/router-catalogs.json
+          git commit -m "Refresh OpenRouter and Kilo catalogs"
+          git pull --rebase origin main
+          git push origin HEAD:main
