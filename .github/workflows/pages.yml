@@ -29,6 +29,30 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+
+      - name: Verify published data snapshot
+        run: |
+          python3 - <<'PY'
+          import hashlib
+          import json
+          from pathlib import Path
+
+          root = Path("data")
+          manifest = json.loads((root / "manifest.json").read_text(encoding="utf-8"))
+          if manifest.get("schema_version") != "2.0.0":
+              raise SystemExit("Unexpected public manifest schema")
+          for item in manifest.get("files", []):
+              name = item["name"]
+              path = root / name
+              raw = path.read_bytes()
+              if len(raw) != item["bytes"]:
+                  raise SystemExit(f"Size mismatch: {name}")
+              digest = hashlib.sha256(raw).hexdigest()
+              if digest != item["sha256"]:
+                  raise SystemExit(f"SHA-256 mismatch: {name}")
+          print(f"PUBLIC_SNAPSHOT_PASS run={manifest.get('generated_from_run_id')}")
+          PY
+
       - name: Configure Pages
         uses: actions/configure-pages@v6
       - name: Upload static site
