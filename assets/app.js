@@ -178,18 +178,27 @@
   const renderers={overview,pricing,value,subscriptions,promotions,benchmarks,models,sources};
   function render() { if(!data) return; const r=route(); setActiveNav(r); renderers[r](); app.focus({preventScroll:true}); }
 
+  async function getJson(path) {
+    const response = await fetch(path, { cache: 'no-store' });
+    if (!response.ok) throw new Error(`${path}: HTTP ${response.status}`);
+    return response.json();
+  }
+
   async function boot() {
     try {
-      const response=await fetch('./data/snapshot.json',{cache:'no-store'});
-      if(!response.ok) throw new Error(`HTTP ${response.status}`);
-      data=await response.json();
+      const manifest = await getJson('./data/manifest.json');
+      const [pricing, promotions, subscriptions, models, benchmarks, events, sourceHealth] = await Promise.all([
+        getJson('./data/pricing.json'), getJson('./data/promotions.json'), getJson('./data/subscriptions.json'),
+        getJson('./data/models.json'), getJson('./data/benchmarks.json'), getJson('./data/events.json'), getJson('./data/sources.json')
+      ]);
+      data = { ...manifest, pricing, promotions, subscriptions, models, benchmarks, events, source_health: sourceHealth };
       syncStatus.textContent=`Run ${data.generated_from_run_id||'—'}`;
       syncStatus.classList.add('ok');
       render();
     } catch (error) {
       console.error(error);
-      syncStatus.textContent='Snapshot indisponible'; syncStatus.classList.add('err');
-      app.innerHTML=`<section class="loading-card"><h1>Données indisponibles</h1><p>Le frontend est chargé, mais <code>data/snapshot.json</code> n’est pas encore accessible. Le prochain cycle de publication réessaiera automatiquement.</p></section>`;
+      syncStatus.textContent='Données indisponibles'; syncStatus.classList.add('err');
+      app.innerHTML=`<section class="loading-card"><h1>Données indisponibles</h1><p>Le frontend est chargé, mais les fichiers publics synchronisés ne sont pas encore accessibles. Le prochain cycle de publication réessaiera automatiquement.</p></section>`;
     }
   }
 
