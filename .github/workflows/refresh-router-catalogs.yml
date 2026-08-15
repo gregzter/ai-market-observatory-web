@@ -12,6 +12,8 @@ on:
 
 permissions:
   contents: write
+  pages: write
+  id-token: write
 
 concurrency:
   group: refresh-router-catalogs
@@ -19,6 +21,9 @@ concurrency:
 
 jobs:
   refresh:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -26,6 +31,21 @@ jobs:
 
       - name: Fetch exhaustive OpenRouter and Kilo catalogs
         run: python3 scripts/refresh_router_catalogs.py
+
+      - name: Verify router projection
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          p = Path('data/router-catalogs.json')
+          data = json.loads(p.read_text(encoding='utf-8'))
+          if data.get('schema_version') != '1.0.0' or not isinstance(data.get('models'), list):
+              raise SystemExit('Invalid router projection')
+          if not data['models']:
+              raise SystemExit('Empty router projection')
+          totals = data.get('totals', {})
+          print(f"ROUTER_CATALOG_PASS entries={len(data['models'])} free={totals.get('free_entries')} qwen={totals.get('qwen_entries')}")
+          PY
 
       - name: Commit current router projection
         run: |
@@ -39,3 +59,13 @@ jobs:
           git commit -m "Refresh OpenRouter and Kilo catalogs"
           git pull --rebase origin main
           git push origin HEAD:main
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v6
+      - name: Upload static site
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: .
+      - name: Deploy refreshed site
+        id: deployment
+        uses: actions/deploy-pages@v4
