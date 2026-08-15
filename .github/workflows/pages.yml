@@ -5,7 +5,9 @@ on:
     branches: [main]
     paths:
       - 'data/manifest.json'
+      - 'data/router-catalogs.json'
       - 'index.html'
+      - 'routers.html'
       - 'assets/**'
       - '.nojekyll'
       - '.github/workflows/pages.yml'
@@ -50,6 +52,12 @@ jobs:
               digest = hashlib.sha256(raw).hexdigest()
               if digest != item["sha256"]:
                   raise SystemExit(f"SHA-256 mismatch: {name}")
+          router = root / "router-catalogs.json"
+          if router.exists():
+              data = json.loads(router.read_text(encoding="utf-8"))
+              if data.get("schema_version") != "1.0.0" or not isinstance(data.get("models"), list):
+                  raise SystemExit("Invalid router catalog projection")
+              print(f"ROUTER_CATALOG_PASS entries={len(data['models'])} free={data.get('totals',{}).get('free_entries')} qwen={data.get('totals',{}).get('qwen_entries')}")
           print(f"PUBLIC_SNAPSHOT_PASS run={manifest.get('generated_from_run_id')}")
           PY
 
