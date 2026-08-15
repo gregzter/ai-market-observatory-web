@@ -3,6 +3,12 @@ name: Deploy AI Market Observatory site
 on:
   push:
     branches: [main]
+    paths:
+      - 'data/manifest.json'
+      - 'index.html'
+      - 'assets/**'
+      - '.nojekyll'
+      - '.github/workflows/pages.yml'
   workflow_dispatch:
 
 permissions:
@@ -24,7 +30,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
       - name: Configure Pages
-        uses: actions/configure-pages@v5
+        uses: actions/configure-pages@v6
       - name: Upload static site
         uses: actions/upload-pages-artifact@v4
         with:
