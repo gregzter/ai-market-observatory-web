@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="AI Market Observatory — modèles IA, prix API, abonnements, promotions, benchmarks et providers.">
+  <meta name="color-scheme" content="dark light">
+  <title>AI Market Observatory</title>
+  <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand-wrap">
+      <a class="brand" href="#overview" aria-label="AI Market Observatory — accueil">
+        <span class="brand-mark" aria-hidden="true">AMO</span>
+        <span>
+          <strong>AI Market Observatory</strong>
+          <small>Global · quotidien · sourcé</small>
+        </span>
+      </a>
+      <div class="sync" id="syncStatus">Chargement…</div>
+    </div>
+    <nav class="nav" aria-label="Navigation principale">
+      <a href="#overview" data-route="overview">Vue d’ensemble</a>
+      <a href="#pricing" data-route="pricing">Prix API</a>
+      <a href="#value" data-route="value">Value Board</a>
+      <a href="#subscriptions" data-route="subscriptions">Abonnements</a>
+      <a href="#promotions" data-route="promotions">Promotions</a>
+      <a href="#benchmarks" data-route="benchmarks">Benchmarks</a>
+      <a href="#models" data-route="models">Modèles</a>
+      <a href="#sources" data-route="sources">Sources</a>
+    </nav>
+  </header>
+
+  <main id="app" class="shell" tabindex="-1">
+    <section class="loading-card">
+      <div class="spinner" aria-hidden="true"></div>
+      <h1>Chargement de l’observatoire</h1>
+      <p>Lecture du snapshot public dérivé des données canoniques.</p>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p><strong>AI Market Observatory</strong> — projection publique en lecture seule.</p>
+    <p>Les devises ne sont jamais converties implicitement et aucun score composite caché n’est utilisé.</p>
+  </footer>
+
+  <noscript>
+    <div class="noscript">JavaScript est nécessaire pour afficher les tableaux interactifs.</div>
+  </noscript>
+  <script src="assets/app.js" defer></script>
+</body>
+</html>
