@@ -29,7 +29,7 @@ jobs:
 
       - name: Commit current router projection
         run: |
-          if git diff --quiet -- data/router-catalogs.json && [ -f data/router-catalogs.json ]; then
+          if [ -z "$(git status --porcelain -- data/router-catalogs.json)" ]; then
             echo "Router projection unchanged"
             exit 0
           fi
